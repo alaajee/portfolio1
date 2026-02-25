@@ -1,7 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import profilePhoto from "./assets/photo.jpeg"; // 👈 rename this to match your actual filename
+import profilePhoto from "./assets/photo.jpg"; // 👈 rename this to match your actual filename
 
-const NAV_LINKS = ["About", "Experience", "Skills", "Projects", "Contact"];
+const NAV_LINKS = ["About", "Experience", "Skills", "Projects", "Languages", "Contact"];
+
+const LANGUAGES = [
+  { name: "Arabic", native: "العربية", level: "Native", percent: 100, flag: "🇲🇦" },
+  { name: "French", native: "Français", level: "Fluent", percent: 95, flag: "🇫🇷" },
+  { name: "English", native: "English", level: "Fluent", percent: 92, flag: "🇬🇧" },
+  { name: "Spanish", native: "Español", level: "Fluent", percent: 85, flag: "🇪🇸" },
+];
 
 const EXPERIENCES = [
   {
@@ -109,7 +116,17 @@ function FadeIn({ children, delay = 0, className = "" }) {
   );
 }
 
-// ---- Styles ----
+function AnimatedBar({ percent }) {
+  const [ref, visible] = useInView(0.3);
+  return (
+    <div ref={ref} className="lang-bar-track">
+      <div className="lang-bar-fill" style={{ width: visible ? `${percent}%` : "0%" }} />
+      <div className="lang-bar-dot" style={{ left: visible ? `${percent}%` : "0%" }} />
+    </div>
+  );
+}
+
+
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -857,7 +874,91 @@ const css = `
     color: var(--champagne-dim);
   }
 
-  /* Footer */
+  /* Languages */
+  .languages-section { background: var(--navy); }
+
+  .lang-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 780px;
+  }
+
+  .lang-row {
+    display: grid;
+    grid-template-columns: 48px 180px 1fr 100px;
+    align-items: center;
+    gap: 32px;
+    padding: 28px 36px;
+    background: var(--midnight);
+    border: 1px solid var(--border);
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+  .lang-row:hover {
+    border-color: var(--border-rose);
+    transform: translateX(6px);
+  }
+
+  .lang-flag {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+
+  .lang-names { display: flex; flex-direction: column; gap: 4px; }
+  .lang-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .lang-native {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .lang-bar-track {
+    height: 1px;
+    background: var(--border);
+    position: relative;
+    overflow: visible;
+  }
+  .lang-bar-fill {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 2px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, var(--rose), var(--champagne-dim));
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 2px;
+  }
+  .lang-bar-dot {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--champagne);
+    transition: left 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .lang-level {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--champagne-dim);
+    text-align: right;
+  }
+
+  @media (max-width: 900px) {
+    .lang-row {
+      grid-template-columns: 40px 1fr 80px;
+      gap: 16px;
+    }
+    .lang-bar-track { display: none; }
+  }
   footer {
     padding: 40px 60px;
     border-top: 1px solid var(--border);
@@ -869,20 +970,61 @@ const css = `
     color: var(--text-dim);
   }
 
-  /* Responsive */
+  /* Responsive — tablet */
   @media (max-width: 900px) {
     nav { padding: 20px 24px; }
-    section { padding: 80px 24px; }
-    .hero { padding: 0 24px; }
-    .hero-langs { display: none; }
-    .hero-scroll-indicator { left: 24px; }
-    .about-grid { grid-template-columns: 1fr; }
-    .hero-inner { grid-template-columns: 1fr; }
-    .hero-photo-wrapper { padding-top: 100%; max-width: 320px; margin: 0 auto; }
-    .contact-inner { grid-template-columns: 1fr; }
-    .exp-item { grid-template-columns: 1fr; gap: 16px; }
     .nav-links { gap: 20px; }
+    section { padding: 80px 24px; }
+    .hero { padding: 0 24px; padding-top: 100px; min-height: auto; }
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; padding: 60px 0 80px; }
+    .hero-photo-wrapper { padding-top: 90%; max-width: 280px; margin: 0 auto; }
+    .hero-langs { display: none; }
+    .hero-scroll-indicator { display: none; }
+    .hero-name { font-size: clamp(3rem, 10vw, 5rem); }
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    .contact-inner { grid-template-columns: 1fr; gap: 48px; }
+    .exp-item { grid-template-columns: 1fr; gap: 12px; padding: 28px 24px; }
+    .skills-grid { grid-template-columns: 1fr 1fr; }
+    .projects-grid { grid-template-columns: 1fr; }
     footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+
+  /* Responsive — mobile */
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .nav-links { gap: 14px; }
+    .nav-links a { font-size: 0.68rem; letter-spacing: 0.12em; }
+    section { padding: 60px 20px; }
+    .hero { padding: 0 20px; padding-top: 80px; }
+    .hero-inner { padding: 40px 0 60px; gap: 36px; }
+    .hero-eyebrow { font-size: 0.62rem; letter-spacing: 0.2em; flex-wrap: wrap; }
+    .hero-name { font-size: clamp(2.8rem, 12vw, 4rem); }
+    .hero-title { font-size: 1rem; }
+    .hero-bio { font-size: 0.88rem; margin-bottom: 32px; }
+    .hero-cta { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .btn-primary { padding: 12px 28px; font-size: 0.72rem; }
+    .hero-photo-wrapper { padding-top: 110%; max-width: 240px; }
+    .section-title { font-size: clamp(1.8rem, 8vw, 2.8rem); margin-bottom: 40px; }
+    .about-stats { grid-template-columns: 1fr 1fr; gap: 2px; }
+    .stat-card { padding: 24px 20px; }
+    .stat-number { font-size: 2.2rem; }
+    .exp-item { padding: 24px 20px; }
+    .exp-company { font-size: 1.2rem; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .skill-category { padding: 28px 24px; }
+    .project-card { padding: 28px 24px; }
+    .contact-link-item { padding: 16px 20px; flex-direction: column; align-items: flex-start; gap: 4px; }
+    .contact-link-item:hover { padding-left: 20px; }
+    footer { padding: 28px 20px; font-size: 0.65rem; }
+    .nav-logo { font-size: 1.2rem; }
+  }
+
+  /* Very small screens */
+  @media (max-width: 380px) {
+    .nav-links { gap: 10px; }
+    .nav-links a { font-size: 0.6rem; }
+    .hero-name { font-size: 2.6rem; }
+    .about-stats { grid-template-columns: 1fr; }
   }
 `;
 
@@ -1095,6 +1237,29 @@ export default function Portfolio() {
         </div>
       </section>
 
+      {/* Languages */}
+      <section className="languages-section" id="languages">
+        <FadeIn>
+          <div className="section-label">Languages</div>
+          <h2 className="section-title">I speak in<br /><em>four tongues</em></h2>
+        </FadeIn>
+        <div className="lang-list">
+          {LANGUAGES.map((l, i) => (
+            <FadeIn key={i} delay={i * 0.1}>
+              <div className="lang-row">
+                <div className="lang-flag">{l.flag}</div>
+                <div className="lang-names">
+                  <div className="lang-name">{l.name}</div>
+                  <div className="lang-native">{l.native}</div>
+                </div>
+                <AnimatedBar percent={l.percent} />
+                <div className="lang-level">{l.level}</div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </section>
+
       {/* Contact */}
       <section id="contact">
         <div className="contact-inner">
@@ -1113,12 +1278,12 @@ export default function Portfolio() {
             <div className="contact-links">
               {[
                 { label: "Email", value: "alaa.jennine@email.com", href: "mailto:alaa.jennine@email.com" },
-                { label: "LinkedIn", value: "linkedin.com/in/alaa-jennine-14465022b", href: "#" },
-                { label: "GitHub", value: "github.com/alaajee", href: "#" },
+                { label: "LinkedIn", value: "linkedin.com/in/alaa-jennine-14465022b", href: "https://www.linkedin.com/in/alaa-jennine-14465022b" },
+                { label: "GitHub", value: "github.com/alaajee", href: "https://github.com/alaajee" },
                 { label: "Location", value: "Grenoble, France", href: null },
               ].map((c, i) => (
                 c.href
-                  ? <a href={c.href} className="contact-link-item" key={i}>
+                  ? <a href={c.href} className="contact-link-item" key={i} target="_blank" rel="noreferrer">
                       <span className="contact-link-label">{c.label}</span>
                       <span className="contact-link-value">{c.value}</span>
                     </a>
@@ -1134,7 +1299,7 @@ export default function Portfolio() {
 
       {/* Footer */}
       <footer>
-        <span>© 2026 Alaa Jennine — All rights reserved</span>
+        <span>© 2024 Alaa Jennine — All rights reserved</span>
         <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", color: "var(--rose-light)" }}>
           Built with care & precision
         </span>
