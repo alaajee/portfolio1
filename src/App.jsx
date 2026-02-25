@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import profilePhoto from "./assets/photo.jpg"; // 👈 rename this to match your actual filename
+import profilePhoto from "./assets/photo.jpeg"; // 👈 rename this to match your actual filename
 
 const NAV_LINKS = ["About", "Experience", "Skills", "Projects", "Languages", "Contact"];
 
